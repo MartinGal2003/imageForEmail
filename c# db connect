@@ -1,0 +1,57 @@
+using MySqlConnector;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace adatbazisoscuccli
+{
+    class Konyvtar
+    {
+        public int id;
+        public string konyvtarNev;
+        public int irsz;
+        public string cim;
+    }
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            List<Konyvtar> konyvtarak = new List<Konyvtar>();
+            MySqlConnection kapcsolat = new MySqlConnection("server=localhost;user=root;password=root;database=ktarak;port=3306");
+            try
+            {
+                kapcsolat.Open();
+                string sqlparancs = "SELECT * FROM konyvtarak";
+                MySqlCommand parancs = new MySqlCommand(sqlparancs, kapcsolat);
+                MySqlDataReader beolvas = parancs.ExecuteReader();
+                while (beolvas.Read())
+                {
+                    konyvtarak.Add(new Konyvtar()
+                    {
+                        cim = beolvas["cim"].ToString(),
+                        id = int.Parse(beolvas["id"].ToString()),
+                        irsz = int.Parse(beolvas["irsz"].ToString()),
+                        konyvtarNev = beolvas["konyvtarNev"].ToString()
+                    });
+                }beolvas.Close();
+
+            }catch (Exception x) 
+            {
+                Console.WriteLine(x.Message);
+            }
+            kapcsolat.Clone();
+
+            Console.WriteLine($"3. feladat: Beolvasott könyvtárak száma {konyvtarak.Count} db");
+
+
+            Console.WriteLine($"4. feladat: Szakkönyvtárak:");
+            foreach(var e in konyvtarak.Where(x => x.konyvtarNev.Contains("Szakkönyvtár")).OrderBy(y => y.konyvtarNev))
+            {
+                Console.WriteLine($"\t - {e.konyvtarNev}");
+            }
+
+
+            Console.ReadKey();
+        }
